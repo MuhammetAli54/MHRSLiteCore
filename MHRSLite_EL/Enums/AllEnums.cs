@@ -16,4 +16,10 @@ namespace MHRSLite_EL.Enums
         Kadın,
         Erkek
     }
+
+    public enum RoleNames:byte
+    {
+        Passive,
+        Admin
+    }
 }
