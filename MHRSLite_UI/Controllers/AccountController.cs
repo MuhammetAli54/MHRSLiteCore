@@ -3,6 +3,7 @@ using MHRSLite_EL;
 using MHRSLite_EL.Enums;
 using MHRSLite_EL.IdentityModels;
 using MHRSLite_UI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -148,6 +149,48 @@ namespace MHRSLite_UI.Controllers
                 ViewBag.EmailConfirmedMessage = "Beklenmedik bir hata oldu. Tekrar deneyiniz!";
                 return View();
             }
+        }
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    ModelState.AddModelError("", "Veri girişleri düzgün olmalıdır!");
+                    return View(model);
+                }
+                var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, true);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Kullanıcı adınız veya şifreniz hatalıdır!");
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Beklenmedik bir hata oluştu!");
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
     }
 }
