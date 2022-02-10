@@ -112,6 +112,42 @@ namespace MHRSLite_UI.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            try
+            {
+                if (userId==null || code==null)
+                {
+                    return NotFound("Sayfa bulunamadı!");
+                }
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user==null)
+                {
+                    return NotFound("Kullanıcı bulunamadı!");
+                }
+               code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+                var result = await _userManager.ConfirmEmailAsync(user, code);
+                if (result.Succeeded)
+                {
+                    if (_userManager.IsInRoleAsync(user,RoleNames.Passive.ToString()).Result)
+                    {
+                        await _userManager.RemoveFromRoleAsync(user, RoleNames.Passive.ToString());
+                        await _userManager.AddToRoleAsync(user, RoleNames.Patient.ToString());
+                    }
 
+                    TempData["EmailConfirmedMessage"] = "Hesabınız aktifleşmiştir";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                ViewBag.EmailConfirmedMessage = "Hesap aktifleştirme başarısızdır!";
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.EmailConfirmedMessage = "Beklenmedik bir hata oldu. Tekrar deneyiniz!";
+                return View();
+            }
+        }
     }
 }
