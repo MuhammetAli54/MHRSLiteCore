@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MHRSLite_EL.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -33,5 +34,7 @@ namespace MHRSLite_UI.Models
         [Compare(nameof(Password), ErrorMessage = "Şifreler uyuşmuyor")]
         public string ConfirmPassword { get; set; }
 
+        [Required(ErrorMessage = "Cinsiyet seçimi gereklidir.")]
+        public Genders Gender { get; set; }
     }
 }

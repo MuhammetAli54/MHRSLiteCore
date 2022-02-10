@@ -22,8 +22,4 @@
     <ProjectReference Include="..\MHRSLite_EL\MHRSLite_EL.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
 </Project>

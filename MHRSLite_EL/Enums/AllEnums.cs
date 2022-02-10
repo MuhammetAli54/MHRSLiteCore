@@ -20,6 +20,7 @@ namespace MHRSLite_EL.Enums
     public enum RoleNames:byte
     {
         Passive,
-        Admin
+        Admin,
+        Patient
     }
 }
