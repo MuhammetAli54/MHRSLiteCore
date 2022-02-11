@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_EL.Models
 {
-    public class HospitalsClinics : Base<int>
+    public class HospitalClinics : Base<int>
     {
         //Hastane ile ilişki kuruldu
         public int HospitalId { get; set; }
@@ -22,5 +22,9 @@ namespace MHRSLite_EL.Models
         public string DoctorId { get; set; }
         [ForeignKey("DoktorId")]
         public virtual Doctor Doctor { get; set; }
+
+        public virtual List<AppointmentHours> AppointmentHours { get; set; }
+
+        public virtual List<Appointment> ClinicAppointments { get; set; }
     }
 }

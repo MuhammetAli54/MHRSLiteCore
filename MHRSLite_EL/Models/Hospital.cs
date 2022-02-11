@@ -20,7 +20,7 @@ namespace MHRSLite_EL.Models
         [ForeignKey("DistrictId")]
         public virtual District HospitalDistrict { get; set; }
 
-        public virtual List<HospitalsClinics> HospitalsClinics { get; set; }
+        public virtual List<HospitalClinics> HospitalClinics { get; set; }
 
     }
 }

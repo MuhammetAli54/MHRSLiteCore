@@ -16,7 +16,7 @@ namespace MHRSLite_EL.Models
         public string ClinicName { get; set; }
 
         //HospitalClinics tablosunda Clinic ile ilişki kuruldu.
-        public virtual List<HospitalsClinics> HospitalsClinics { get; set; }
+        public virtual List<HospitalClinics> HospitalClinics { get; set; }
 
     }
 }
