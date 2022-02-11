@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_EL.Models
 {
+    [Table("Appointment")]
     public class Appointment : Base<int>
     {
         public string PatientId { get; set; }
@@ -24,6 +25,6 @@ namespace MHRSLite_EL.Models
         public virtual Patient Patient { get; set; }
 
         [ForeignKey("HospitalClinicId")]
-        public virtual HospitalClinics HospitalClinic { get; set; }
+        public virtual HospitalClinic HospitalClinic { get; set; }
     }
 }

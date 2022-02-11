@@ -15,6 +15,6 @@ namespace MHRSLite_EL.Models
 
         [ForeignKey("UserId")]
         public virtual AppUser AppUser { get; set; } // Identity Model'in ID değeri burada Foreign Key olacaktır.
-        public virtual List<HospitalClinics> HospitalClinics { get; set; }
+        public virtual List<HospitalClinic> HospitalClinics { get; set; }
     }
 }

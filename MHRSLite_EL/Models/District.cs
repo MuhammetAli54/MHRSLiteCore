@@ -14,11 +14,11 @@ namespace MHRSLite_EL.Models
         [Required]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "İlçe adı en az 2 en çok 50 karakter olmalıdır!")]
         public string DistrictName { get; set; }
-        public int CityId { get; set; }
+        public byte CityId { get; set; }
 
         [ForeignKey("CityId")]
         public virtual City City { get; set; }
 
-        public virtual List<Hospital> DistrictsHospitals { get; set; }
+        public virtual List<Hospital> DistrictHospitals { get; set; }
     }
 }
