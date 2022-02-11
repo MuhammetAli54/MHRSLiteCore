@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MHRSLite_DAL.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20220211075325_TablesInitalize")]
-    partial class TablesInitalize
+    [Migration("20220211083715_BaseIdUpdated")]
+    partial class BaseIdUpdated
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -141,7 +141,7 @@ namespace MHRSLite_DAL.Migrations
 
             modelBuilder.Entity("MHRSLite_EL.Models.Appointment", b =>
                 {
-                    b.Property<int>("GetT")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -162,7 +162,7 @@ namespace MHRSLite_DAL.Migrations
                     b.Property<string>("PatientId")
                         .HasColumnType("nvarchar(11)");
 
-                    b.HasKey("GetT");
+                    b.HasKey("Id");
 
                     b.HasIndex("HospitalClinicId");
 
@@ -171,9 +171,9 @@ namespace MHRSLite_DAL.Migrations
                     b.ToTable("Appointment");
                 });
 
-            modelBuilder.Entity("MHRSLite_EL.Models.AppointmentHours", b =>
+            modelBuilder.Entity("MHRSLite_EL.Models.AppointmentHour", b =>
                 {
-                    b.Property<int>("GetT")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -188,7 +188,7 @@ namespace MHRSLite_DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("GetT");
+                    b.HasKey("Id");
 
                     b.HasIndex("HospitalClinicId");
 
@@ -197,7 +197,7 @@ namespace MHRSLite_DAL.Migrations
 
             modelBuilder.Entity("MHRSLite_EL.Models.City", b =>
                 {
-                    b.Property<byte>("GetT")
+                    b.Property<byte>("Id")
                         .HasColumnType("tinyint");
 
                     b.Property<string>("CityName")
@@ -211,14 +211,14 @@ namespace MHRSLite_DAL.Migrations
                     b.Property<byte>("PlateCode")
                         .HasColumnType("tinyint");
 
-                    b.HasKey("GetT");
+                    b.HasKey("Id");
 
                     b.ToTable("Cities");
                 });
 
             modelBuilder.Entity("MHRSLite_EL.Models.Clinic", b =>
                 {
-                    b.Property<int>("GetT")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -231,14 +231,14 @@ namespace MHRSLite_DAL.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("GetT");
+                    b.HasKey("Id");
 
                     b.ToTable("Clinics");
                 });
 
             modelBuilder.Entity("MHRSLite_EL.Models.District", b =>
                 {
-                    b.Property<int>("GetT")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -254,7 +254,7 @@ namespace MHRSLite_DAL.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("GetT");
+                    b.HasKey("Id");
 
                     b.HasIndex("CityId");
 
@@ -279,7 +279,7 @@ namespace MHRSLite_DAL.Migrations
 
             modelBuilder.Entity("MHRSLite_EL.Models.Hospital", b =>
                 {
-                    b.Property<int>("GetT")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -295,16 +295,16 @@ namespace MHRSLite_DAL.Migrations
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)");
 
-                    b.HasKey("GetT");
+                    b.HasKey("Id");
 
                     b.HasIndex("DistrictId");
 
                     b.ToTable("Hospitals");
                 });
 
-            modelBuilder.Entity("MHRSLite_EL.Models.HospitalClinics", b =>
+            modelBuilder.Entity("MHRSLite_EL.Models.HospitalClinic", b =>
                 {
-                    b.Property<int>("GetT")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -324,7 +324,7 @@ namespace MHRSLite_DAL.Migrations
                     b.Property<int>("HospitalId")
                         .HasColumnType("int");
 
-                    b.HasKey("GetT");
+                    b.HasKey("Id");
 
                     b.HasIndex("ClinicId");
 
@@ -457,7 +457,7 @@ namespace MHRSLite_DAL.Migrations
 
             modelBuilder.Entity("MHRSLite_EL.Models.Appointment", b =>
                 {
-                    b.HasOne("MHRSLite_EL.Models.HospitalClinics", "HospitalClinic")
+                    b.HasOne("MHRSLite_EL.Models.HospitalClinic", "HospitalClinic")
                         .WithMany("ClinicAppointments")
                         .HasForeignKey("HospitalClinicId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -472,15 +472,15 @@ namespace MHRSLite_DAL.Migrations
                     b.Navigation("Patient");
                 });
 
-            modelBuilder.Entity("MHRSLite_EL.Models.AppointmentHours", b =>
+            modelBuilder.Entity("MHRSLite_EL.Models.AppointmentHour", b =>
                 {
-                    b.HasOne("MHRSLite_EL.Models.HospitalClinics", "GetHospitalClinics")
+                    b.HasOne("MHRSLite_EL.Models.HospitalClinic", "HospitalClinic")
                         .WithMany("AppointmentHours")
                         .HasForeignKey("HospitalClinicId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("GetHospitalClinics");
+                    b.Navigation("HospitalClinic");
                 });
 
             modelBuilder.Entity("MHRSLite_EL.Models.District", b =>
@@ -506,7 +506,7 @@ namespace MHRSLite_DAL.Migrations
             modelBuilder.Entity("MHRSLite_EL.Models.Hospital", b =>
                 {
                     b.HasOne("MHRSLite_EL.Models.District", "HospitalDistrict")
-                        .WithMany("DistrictsHospitals")
+                        .WithMany("DistrictHospitals")
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -514,7 +514,7 @@ namespace MHRSLite_DAL.Migrations
                     b.Navigation("HospitalDistrict");
                 });
 
-            modelBuilder.Entity("MHRSLite_EL.Models.HospitalClinics", b =>
+            modelBuilder.Entity("MHRSLite_EL.Models.HospitalClinic", b =>
                 {
                     b.HasOne("MHRSLite_EL.Models.Clinic", "Clinic")
                         .WithMany("HospitalClinics")
@@ -618,7 +618,7 @@ namespace MHRSLite_DAL.Migrations
 
             modelBuilder.Entity("MHRSLite_EL.Models.District", b =>
                 {
-                    b.Navigation("DistrictsHospitals");
+                    b.Navigation("DistrictHospitals");
                 });
 
             modelBuilder.Entity("MHRSLite_EL.Models.Doctor", b =>
@@ -631,7 +631,7 @@ namespace MHRSLite_DAL.Migrations
                     b.Navigation("HospitalClinics");
                 });
 
-            modelBuilder.Entity("MHRSLite_EL.Models.HospitalClinics", b =>
+            modelBuilder.Entity("MHRSLite_EL.Models.HospitalClinic", b =>
                 {
                     b.Navigation("AppointmentHours");
 

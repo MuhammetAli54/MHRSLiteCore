@@ -12,7 +12,7 @@ namespace MHRSLite_EL.Models
     {
         [Key]
         [Column(Order = 1)]
-        public T GetT { get; set; }
+        public T Id { get; set; }
 
         [Column(Order = 2)]
         [DataType(DataType.DateTime)]
