@@ -44,6 +44,7 @@ namespace MHRSLite_UI
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddMvc();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddSession(options => 
             {
                 options.IdleTimeout = TimeSpan.FromSeconds(60);

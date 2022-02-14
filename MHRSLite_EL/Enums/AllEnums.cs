@@ -13,8 +13,9 @@ namespace MHRSLite_EL.Enums
     public enum Genders
     {
         Belirtilmemiş,
-        Kadın,
-        Erkek
+        Erkek,
+        Kadın
+       
     }
 
     public enum RoleNames:byte
