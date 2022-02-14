@@ -11,7 +11,7 @@ namespace MHRSLite_BLL.Implementations
 {
     public class Repository<T> : IRepositoryBase<T> where T : class, new()
     {
-        private readonly MyContext _myContext;
+        protected readonly MyContext _myContext;
         public Repository(MyContext myContext)
         {
             _myContext = myContext;

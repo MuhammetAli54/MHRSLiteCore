@@ -1,6 +1,11 @@
+using MHRSLite_BLL.Contracts;
+using MHRSLite_BLL.EmailService;
+using MHRSLite_BLL.Implementations;
 using MHRSLite_DAL;
+using MHRSLite_EL.IdentityModels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +34,33 @@ namespace MHRSLite_UI
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SqlConnection"));
             });
+
+            //*********************************
+            //IUnitOfWork gördüðün zaman bize IUnitOfWork nesnesi üret!
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            //EmailSender gördüðün zaman bize EmailSender nesnesi üret!
+            services.AddTransient<IEmailSender, EmailSender>();
+            //********************************
             services.AddControllersWithViews();
+            services.AddRazorPages();
+            services.AddMvc();
+            services.AddSession(options => 
+            {
+                options.IdleTimeout = TimeSpan.FromSeconds(60);
+            });
+
+            //**********************************
+            services.AddIdentity<AppUser, AppRole>(opts =>
+            {
+                opts.User.RequireUniqueEmail = true;
+                opts.Password.RequiredLength = 6;
+                opts.Password.RequireNonAlphanumeric = false;
+                opts.Password.RequireLowercase = false;
+                opts.Password.RequireUppercase = false;
+                opts.Password.RequireDigit = false;
+                opts.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
+            }).AddDefaultTokenProviders().AddEntityFrameworkStores<MyContext>();
+            //**********************************
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,6 +79,12 @@ namespace MHRSLite_UI
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseStaticFiles();
+            app.UseRouting(); //rooting mekanizmasý için
+            app.UseSession();
+            app.UseAuthentication(); //login logout kullanabilmek için
+            app.UseAuthorization(); //authorization attiribute kullanabilmek için
 
             app.UseEndpoints(endpoints =>
             {

@@ -11,11 +11,9 @@ namespace MHRSLite_BLL.Implementations
 {
    public class ClinicRepository :Repository<Clinic>, IClinicRepository
     {
-        private readonly MyContext _myContext;
 
         public ClinicRepository(MyContext myContext):base(myContext)
         {
-            _myContext = myContext;
         }
     }
 }

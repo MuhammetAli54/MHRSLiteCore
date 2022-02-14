@@ -11,7 +11,6 @@ namespace MHRSLite_BLL.Implementations
 {
    public class PatientRepository:Repository<Patient>, IPatientRepository
     {
-        private readonly MyContext _myContext;
         public PatientRepository(MyContext myContext):base(myContext)
         {
 

@@ -11,7 +11,6 @@ namespace MHRSLite_BLL.Implementations
 {
    public class DistrictRepository : Repository<District>,IDistrictRepository
     {
-        private readonly MyContext _myContext;
 
         public DistrictRepository(MyContext myContext) : base(myContext)
         {
