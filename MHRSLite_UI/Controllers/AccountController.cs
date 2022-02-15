@@ -29,7 +29,8 @@ namespace MHRSLite_UI.Controllers
         private readonly IConfiguration _configuration;
 
         public AccountController(UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager, RoleManager<AppRole> roleManager, IEmailSender emailSender,IUnitOfWork unitOfWork, IConfiguration configuration)
+            SignInManager<AppUser> signInManager, RoleManager<AppRole> roleManager, 
+            IEmailSender emailSender,IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -193,6 +194,17 @@ namespace MHRSLite_UI.Controllers
                     ModelState.AddModelError("", "Veri girişleri düzgün olmalıdır!");
                     return View(model);
                 }
+                //user'ı bulup emailconfirmed kontrol edilsin.
+                var user = await _userManager.FindByNameAsync(model.UserName);
+                if (user!=null)
+                {
+                    if (!user.EmailConfirmed)
+                    {
+                        ModelState.AddModelError("", "Sistemi kullanabilmeniz için üyeliğinizi aktifleştirmeniz gerekmektedir.Emailinize gönderilen aktivasyon linkine tıklayarak aktifleştirme işlemini yapabilirsiniz!");
+                        return View(model);
+                    }
+                }
+
                 var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, true);
                 if (result.Succeeded)
                 {
