@@ -254,6 +254,7 @@ namespace MHRSLite_UI.Controllers
                     var callBackUrl = Url.Action("ConfirmResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Scheme);
                     var emailMessage = new EmailMessage()
                     {
+                        Contacts=new string[] {user.Email},
                         Subject = "MHRSLite - Şifremi unuttum",
                         Body=$"Merhaba {user.Name} {user.Surname},<br/>Yeni Parola belirlemek için <a href='{HtmlEncoder.Default.Encode(callBackUrl)}'>buraya</a> tıklayınız."
                     };
@@ -274,7 +275,8 @@ namespace MHRSLite_UI.Controllers
         {
             if (string.IsNullOrEmpty(userId)|| string.IsNullOrEmpty(code))
             {
-                return BadRequest("deneme");
+                ModelState.AddModelError(string.Empty, "Kullanıcı bulunamadı!");
+                return View();
             }
             ViewBag.UserId = userId;
             ViewBag.Code = code;
@@ -300,7 +302,7 @@ namespace MHRSLite_UI.Controllers
                 var result = await _userManager.ResetPasswordAsync(user, code, model.NewPassword);
                 if (result.Succeeded)
                 {
-                    TempData["ConfirmResetPasswordMEssage"] = "Şifreniz başarılı bir şekilde değiştirildi";
+                    TempData["ConfirmResetPasswordMessage"] = "Şifreniz başarılı bir şekilde değiştirildi";
                     return RedirectToAction("Login", "Account");
                 }
                 else
