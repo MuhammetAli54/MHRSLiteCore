@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,15 +26,17 @@ namespace MHRSLite_UI.Controllers
         private readonly RoleManager<AppRole> _roleManager;
         private readonly IEmailSender _emailSender;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _configuration;
 
         public AccountController(UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager, RoleManager<AppRole> roleManager, IEmailSender emailSender,IUnitOfWork unitOfWork)
+            SignInManager<AppUser> signInManager, RoleManager<AppRole> roleManager, IEmailSender emailSender,IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _emailSender = emailSender;
             _unitOfWork = unitOfWork;
+            _configuration = configuration;
             CheckRoles();
         }
 
@@ -92,7 +95,7 @@ namespace MHRSLite_UI.Controllers
                 var result = await _userManager.CreateAsync(newUser, model.Password);
                 if (result.Succeeded)
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(newUser, RoleNames.Patient.ToString());
+                    var roleResult = await _userManager.AddToRoleAsync(newUser, RoleNames.Passive.ToString());
                     //email gönderilmelidir
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -113,6 +116,14 @@ namespace MHRSLite_UI.Controllers
                     if (_unitOfWork.PatientRepository.Add(newPatient) == false)
                     {
                         //sistem yöneticisine email gitsin
+                        var emailMessageToAdmin = new EmailMessage()
+                        {
+                            Contacts =new string[] { _configuration.GetSection("ManagerEmails:Email").Value },
+                            CC = new string[] { _configuration.GetSection("ManagerEmails:EmailToCC").Value },
+                            Subject = "MHRSLite-HATA! Patient Tablosu",
+                            Body = $"Aşağıdaki bilgilere sahip kişi eklenirken hata oluştu! Patient Tablosuna bilgileri ekleyiniz. <br/> Bilgiler: TcNumber: {model.TCNumber} <br/> UserId: {newUser.Id}"
+                        };
+                        await _emailSender.SendAsync(emailMessageToAdmin);
                     }
                     return RedirectToAction("Login", "Account");
                 }
