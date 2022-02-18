@@ -61,7 +61,6 @@
         <!-- End About us -->
 
         <partial name="Partials/_FooterPartial" />
-
         <a href="#" id="scroll-to-top" class="new-btn-d br-2"><i class="fa fa-angle-up"></i></a>
 
         <!-- ALL JS FILES -->
@@ -81,5 +80,8 @@
         <script src="~/health-theme-assets/js/isotope.min.js"></script>
         <script src="~/health-theme-assets/js/images-loded.min.js"></script>
         <script src="~/health-theme-assets/js/custom.js"></script>
+        @RenderSection("Scripts",false)
+        @* Aynı metodun async versiyonu bulunmaktadır.*@
+        @*@await RenderSectionAsync("Scripts", false)*@
 </body>
 </html>

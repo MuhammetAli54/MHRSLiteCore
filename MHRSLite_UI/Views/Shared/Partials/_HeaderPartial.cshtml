@@ -12,7 +12,7 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbar-wd">
                 <ul class="navbar-nav">
-                    <li><a class="nav-link" href="#home">Randevu Al</a></li>
+                    <li><a class="nav-link" href="/Patient/Index">Randevu Al</a></li>
                     @if (signInManager.IsSignedIn(Context.User))
                     {
                         <li><a class="nav-link" asp-controller="Account" asp-action="Logout">@signInManager.UserManager.FindByNameAsync(Context.User.Identity.Name).Result.Name @signInManager.UserManager.FindByNameAsync(Context.User.Identity.Name).Result.Surname</a></li>
