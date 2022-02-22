@@ -11,7 +11,7 @@ namespace MHRSLite_BLL.Implementations
 {
     public class DoctorRepository:Repository<Doctor>,IDoctorRepository
     {
-        public DoctorRepository(MyContext myContext):base(myContext)
+        public DoctorRepository(MyContext myContext) :base(myContext)
         {
 
         }

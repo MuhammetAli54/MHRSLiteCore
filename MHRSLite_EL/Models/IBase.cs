@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_EL.Models
 {
-   public interface IBase
+    public interface IBase
     {
-
     }
 }

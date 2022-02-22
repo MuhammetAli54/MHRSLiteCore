@@ -9,10 +9,10 @@ namespace MHRSLite_UI.Models
     public class LoginViewModel
     {
         [Display(Name = "TC Kimlik Numaranız")]
-        [Required(ErrorMessage = "TC Kimlik Alanı gereklidir")]
+        [Required(ErrorMessage = "TC Kimlik alanı gereklidir")]
         public string UserName { get; set; }
         [Required(ErrorMessage = "Şifre alanı gereklidir.")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Şifreniz minimum 6 karaterli olmalıdır!")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Şifreniz minimum 6 karakterli olmalıdır!")]
         [Display(Name = "Şifre")]
         [DataType(DataType.Password)]
         public string Password { get; set; }

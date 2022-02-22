@@ -8,15 +8,14 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_EL.Models
 {
-    public class Base<T> : IBase
+    public class Base<T>:IBase
     {
         [Key]
-        [Column(Order = 1)]
+        [Column(Order=1)]
         public T Id { get; set; }
-
-        [Column(Order = 2)]
+        [Column(Order =2)]
         [DataType(DataType.DateTime)]
-        [Display(Name ="Oluşturulma Tarihi")]
+        [Display(Name="Oluşturulma Tarihi")]
         public DateTime CreatedDate { get; set; }
     }
 }

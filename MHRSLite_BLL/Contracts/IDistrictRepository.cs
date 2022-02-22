@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_BLL.Contracts
 {
-    public interface IDistrictRepository : IRepositoryBase<District>
+    public interface IDistrictRepository:IRepositoryBase<District>
     {
 
     }

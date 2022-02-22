@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_BLL.Implementations
 {
-    public class AppointmentHourRepository : Repository<AppointmentHour>, IAppointmentHourRepository
+    public class AppointmentHourRepository:Repository<AppointmentHour>, IAppointmentHourRepository
     {
-
-        public AppointmentHourRepository(MyContext myContext) : base(myContext)
+        public AppointmentHourRepository(MyContext myContext):base(myContext)
         {
+
         }
     }
 }

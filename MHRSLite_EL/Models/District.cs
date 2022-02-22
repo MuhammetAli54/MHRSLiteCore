@@ -9,16 +9,18 @@ using System.Threading.Tasks;
 namespace MHRSLite_EL.Models
 {
     [Table("Districts")]
-   public class District:Base<int>
+    public class District:Base<int>
     {
         [Required]
-        [StringLength(50, MinimumLength = 2, ErrorMessage = "İlçe adı en az 2 en çok 50 karakter olmalıdır!")]
+        [StringLength(50,MinimumLength =2,ErrorMessage ="İlçe adı en az 2 en çok 50 karakter aralığında olmalıdır!")]
         public string DistrictName { get; set; }
-        public byte CityId { get; set; }
 
+        //City tablosuyla ilişki kuruldu.
+        public byte CityId { get; set; }
         [ForeignKey("CityId")]
         public virtual City City { get; set; }
 
+        //İlçedeki hastaneler -- Hastane tablosunda ilişki kuruldu.
         public virtual List<Hospital> DistrictHospitals { get; set; }
     }
 }

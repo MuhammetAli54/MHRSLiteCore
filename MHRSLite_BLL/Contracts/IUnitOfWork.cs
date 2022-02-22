@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_BLL.Contracts
 {
+    //IUnitOfWork -->Bütün repositorylerimizi toplayacak parça
     public interface IUnitOfWork:IDisposable
     {
-        ICityRepository CityRepository { get;}
-        IDistrictRepository DistrictRepository { get;}
+        ICityRepository CityRepository { get; }
+        IDistrictRepository DistrictRepository { get; }
         IDoctorRepository DoctorRepository { get; }
         IPatientRepository PatientRepository { get; }
-        IHospitalRepository HospitalRepository { get;}
+        IHospitalRepository HospitalRepository { get; }
         IClinicRepository ClinicRepository { get; }
         IHospitalClinicRepository HospitalClinicRepository { get; }
         IAppointmentRepository AppointmentRepository { get; }
         IAppointmentHourRepository AppointmentHourRepository { get; }
-
     }
 }

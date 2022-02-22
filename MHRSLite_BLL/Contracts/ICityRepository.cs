@@ -9,6 +9,5 @@ namespace MHRSLite_BLL.Contracts
 {
     public interface ICityRepository:IRepositoryBase<City>
     {
-
     }
 }

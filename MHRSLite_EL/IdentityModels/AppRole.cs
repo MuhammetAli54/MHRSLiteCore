@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_EL.IdentityModels
 {
-    public class AppRole : IdentityRole
+    public class AppRole:IdentityRole
     {
-        [StringLength(400,ErrorMessage ="Role açıklamasına en fazla 400 karakter girilebilir!")]
+        [StringLength(400,ErrorMessage="Role açıklamasına en fazla 400 karakter girilebilir.")]
         public string Description { get; set; }
     }
 }

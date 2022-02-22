@@ -1,4 +1,5 @@
 ﻿using MHRSLite_BLL.Contracts;
+using MHRSLite_BLL.EmailService;
 using MHRSLite_EL;
 using MHRSLite_EL.Enums;
 using MHRSLite_EL.IdentityModels;
@@ -15,28 +16,20 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using MHRSLite_BLL.EmailService;
 
-namespace MHRSLiteUI.Controllers
+namespace MHRSLite_UI.Controllers
 {
     public class AccountController : Controller
     {
-        //GLOBAL ALAN
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<AppRole> _roleManager;
         private readonly IEmailSender _emailSender;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
-
         //Dependency Injection
-        public AccountController(
-            UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager,
-            RoleManager<AppRole> roleManager,
-            IEmailSender emailSender,
-            IUnitOfWork unitOfWork,
-            IConfiguration configuration)
+
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<AppRole> roleManager, IEmailSender emailSender, IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -46,7 +39,6 @@ namespace MHRSLiteUI.Controllers
             _configuration = configuration;
             CheckRoles();
         }
-
         private void CheckRoles()
         {
             var allRoles = Enum.GetNames(typeof(RoleNames));
@@ -76,25 +68,21 @@ namespace MHRSLiteUI.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return View(model);
+                    return View();
                 }
-
-
                 var checkUserForUserName = await _userManager.FindByNameAsync(model.TCNumber);
                 if (checkUserForUserName != null)
                 {
-                    ModelState.AddModelError(nameof(model.TCNumber), "Bu TC Kimlik zaten sistemde kayıtlıdır.");
+                    ModelState.AddModelError(nameof(model.TCNumber), "Bu TC kimlik numarası ile sisteme daha önce kayıt olunmuştur!");
                     return View(model);
                 }
-
                 var checkUserForEmail = await _userManager.FindByEmailAsync(model.Email);
                 if (checkUserForEmail != null)
                 {
-                    ModelState.AddModelError(nameof(model.Email), "Bu email zaten sistemde kayıtlıdır.");
+                    ModelState.AddModelError(nameof(model.Email), "Bu email ile sisteme daha önce kayıt olunmuştur.");
                     return View(model);
                 }
-
-                //Yeni kullanıcı oluşturalım
+                //Yeni kullanıcı oluşturalım.
                 AppUser newUser = new AppUser()
                 {
                     Email = model.Email,
@@ -102,16 +90,14 @@ namespace MHRSLiteUI.Controllers
                     Surname = model.Surname,
                     UserName = model.TCNumber,
                     Gender = model.Gender
-                    //TODO : Birthdate?
-                    //TODO : Phone Number?
+                    //TO DO : Birthdate?
+                    //TO DO : PhoneNumber
                 };
                 var result = await _userManager.CreateAsync(newUser, model.Password);
                 if (result.Succeeded)
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(newUser, RoleNames.Passive.ToString());
-
-
-                    //Email gönderilmelidir.
+                    var roleResult = _userManager.AddToRoleAsync(newUser, RoleNames.Passive.ToString());
+                    //email gönderilmelidir.
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callBackUrl = Url.Action("ConfirmEmail", "Account", new { userId = newUser.Id, code = code }, protocol: Request.Scheme);
@@ -120,31 +106,29 @@ namespace MHRSLiteUI.Controllers
                     {
                         Contacts = new string[] { newUser.Email },
                         Subject = "MHRSLITE - Email Aktivasyonu",
-                        Body = $"Merhaba {newUser.Name} {newUser.Surname}. <br/> Hesabınızı aktifleştirmek için <a href='{HtmlEncoder.Default.Encode(callBackUrl)}'> Buraya </a> tıklayınız."
+                        Body = $"Merhaba {newUser.Name} {newUser.Surname},<br> Hesabınızı aktifleştirmek için <a href='{HtmlEncoder.Default.Encode(callBackUrl)}'>buraya<a/> tıklayınız."
                     };
-
                     await _emailSender.SendAsync(emailMessage);
-
-                    //Patient eklemesi yapılmalıdır.
+                    //patient tablosuna ekleme yapılmalıdır.
                     Patient newPatient = new Patient()
                     {
                         TCNumber = model.TCNumber,
                         UserId = newUser.Id
                     };
-
                     if (_unitOfWork.PatientRepository.Add(newPatient) == false)
                     {
+                        //sistem yöneticisine email gitsin.
                         var emailMessageToAdmin = new EmailMessage()
                         {
                             Contacts = new string[] { _configuration.GetSection("ManagerEmails:Email").Value },
                             CC = new string[] { _configuration.GetSection("ManagerEmails:EmailToCC").Value },
                             Subject = "MHRSLITE - HATA! Patient Tablosu",
-                            Body = $"Aşağıdaki bilgilere sahip kişi eklenirken hata olmuş.Patient Tablosuna bilgileri ekleyiniz. <br/> Bilgiler : TcNumber:{model.TCNumber} <br/> UserId:{newUser.Id}"
+                            Body = $"Aşağıdaki bilgilere sahip kişi eklenirken hata olmuş.Patient tablosuna bilgileri ekleyiniz. <br/> Bilgiler: TCNumber:{model.TCNumber} <br/> UserId{newUser.Id}"
                         };
                         await _emailSender.SendAsync(emailMessageToAdmin);
                     }
-
                     return RedirectToAction("Login", "Account");
+
                 }
                 else
                 {
@@ -168,36 +152,34 @@ namespace MHRSLiteUI.Controllers
                 {
                     return NotFound("Sayfa Bulunamadı!");
                 }
-
                 var user = await _userManager.FindByIdAsync(userId);
-
                 if (user == null)
                 {
                     return NotFound("Kullanıcı Bulunamadı!");
                 }
                 code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-                //EmailConfirmed=1 ya da True
                 var result = await _userManager.ConfirmEmailAsync(user, code);
 
                 if (result.Succeeded)
                 {
+                    //User pasif rolde mi?
                     if (_userManager.IsInRoleAsync(user, RoleNames.Passive.ToString()).Result)
                     {
                         await _userManager.RemoveFromRoleAsync(user, RoleNames.Passive.ToString());
                         await _userManager.AddToRoleAsync(user, RoleNames.Patient.ToString());
                     }
 
-                    TempData["EmailConfirmedMessage"] = "Hesabınız aktifleşmiştir...";
+                    TempData["EmailConfirmedMessage"] = "Hesabınız aktifleştirilmiştir...";
                     return RedirectToAction("Login", "Account");
                 }
 
-                //Login sayfasında bu tempdata view ekranında kontrol edilecektir.>>Değiştirdik ve ViewBag'le yazdık.
                 ViewBag.EmailConfirmedMessage = "Hesap aktifleştirme başarısızdır!";
-                return RedirectToAction("Login", "Account");
+                //Aynı sayfada kalsın istersek ViewBag,başka bir sayfaya yönlendirmesini istersek TempData kullanıyoruz.
+                return View();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ViewBag.EmailConfirmedMessage = "Beklenmedik bir hata oldu! Tekrar deneyiniz.";
+                ViewBag.EmailConfirmedMessage = "Beklenmedik bir hata oluştu! Tekrar deneyiniz.";
                 return View();
             }
         }
@@ -207,7 +189,6 @@ namespace MHRSLiteUI.Controllers
         {
             return View();
         }
-
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -215,44 +196,39 @@ namespace MHRSLiteUI.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    ModelState.AddModelError("", "Veri girişleri düzgün girilmelidir!");
+                    ModelState.AddModelError("", "Veri girişleri düzgün olmalıdır!");
                     return View(model);
                 }
 
-                //user ı bulup emailconfirmed kontrol edilsin.
-                var user = await _userManager
-                    .FindByNameAsync(model.UserName);
-                if (user != null)
+                //user'ı bulup EmailConfirmed kontrol edilsin.
+                var user = await _userManager.FindByNameAsync(model.UserName);
+                if (user!=null)
                 {
-                    //if (User.EmailConfirmed == false)
+                    //if(user.EmailConfirmed==false)
                     if (!user.EmailConfirmed)
                     {
-                        ModelState.AddModelError("", "Sistemi kullanabilmeniz için üyeliğinizi aktifleştirmeniz gerekmektedir. Emailinize gönderilen aktivasyon linkine tıklayarak aktifleştirme işlemini yapabilirsiniz!");
+                        ModelState.AddModelError("","Sistemi kullanabilmeniz için üyeliğinizi aktifleştirmeniz gerekmektedir. Emailinize gönderilen aktivasyon linkine tıklayarak aktifleştirme işlemini yapabilirsiniz!"); 
                         return View(model);
                     }
                 }
 
                 var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, true);
-
                 if (result.Succeeded)
                 {
                     return RedirectToAction("Index", "Home");
-
                 }
                 else
                 {
-                    ModelState.AddModelError("", "TC Kimlik numarası veya şifre hatalıdır!");
+                    ModelState.AddModelError("", "Kullanıcı adı veya şifre hatalıdır!");
                     return View(model);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
                 ModelState.AddModelError("", "Beklenmedik bir hata oluştu!");
                 return View(model);
             }
         }
-
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Logout()
@@ -260,13 +236,11 @@ namespace MHRSLiteUI.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
-
         [HttpGet]
         public IActionResult ResetPassword()
         {
             return View();
         }
-
         [HttpPost]
         public async Task<IActionResult> ResetPassword(string email)
         {
@@ -275,7 +249,7 @@ namespace MHRSLiteUI.Controllers
                 var user = await _userManager.FindByEmailAsync(email);
                 if (user == null)
                 {
-                    ViewBag.ResetPasswordMessage = "Girdiğiniz email bulunamadı";
+                    ViewBag.ResetPasswordMessage = "Girdiğiniz email bulunamadı!";
                 }
                 else
                 {
@@ -285,14 +259,15 @@ namespace MHRSLiteUI.Controllers
 
                     var emailMessage = new EmailMessage()
                     {
-                        Contacts = new string[] { user.Email },
-                        Subject = "MHRSLITE - Şifremi unuttum",
+                        Contacts=new string[] {user.Email},
+                        Subject = "MHRSLITE - Şifremi unuttum ",
                         Body = $"Merhaba {user.Name} {user.Surname}," +
-                                           $" <br/>Yeni parola belirlemek için" +
-                                           $" <a href='{HtmlEncoder.Default.Encode(callBackUrl)}'>buraya</a> tıklayınız. "
+                        $" <br>Yeni parola belirlemek için" +
+                        $"<a href='{HtmlEncoder.Default.Encode(callBackUrl)}'>buraya<a/> tıklayınız."
                     };
                     await _emailSender.SendAsync(emailMessage);
                     ViewBag.ResetPasswordMessage = "Emailinize şifre güncelleme yönergesi gönderilmiştir.";
+                        //return 
                 }
                 return View();
             }
@@ -302,7 +277,6 @@ namespace MHRSLiteUI.Controllers
                 return View();
             }
         }
-
         [HttpGet]
         public IActionResult ConfirmResetPassword(string userId, string code)
         {
@@ -311,12 +285,12 @@ namespace MHRSLiteUI.Controllers
                 //return BadRequest("deneme");
                 ModelState.AddModelError(string.Empty, "Kullanıcı bulunamadı!");
                 return View();
+
             }
             ViewBag.UserId = userId;
             ViewBag.Code = code;
             return View();
         }
-
         [HttpPost]
         public async Task<IActionResult> ConfirmResetPassword(ResetPasswordViewModel model)
         {
@@ -330,14 +304,11 @@ namespace MHRSLiteUI.Controllers
                 var user = await _userManager.FindByIdAsync(model.UserId);
                 if (user == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Kullanıcı bulunamadı!");
+                    ModelState.AddModelError(string.Empty, "Kullanıcı bulunamadı");
                     return View(model);
                 }
-
                 var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Code));
-
                 var result = await _userManager.ResetPasswordAsync(user, code, model.NewPassword);
-
                 if (result.Succeeded)
                 {
                     TempData["ConfirmResetPasswordMessage"] = "Şifreniz başarılı bir şekilde değiştirildi.";
@@ -345,7 +316,7 @@ namespace MHRSLiteUI.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", "HATA : Şifreniz değiştirilmedi!");
+                    ModelState.AddModelError("", "HATA : Şifreniz değiştirilemedi!");
                     return View(model);
                 }
             }

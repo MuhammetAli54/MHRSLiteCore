@@ -9,11 +9,12 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_BLL.Implementations
 {
-   public class ClinicRepository :Repository<Clinic>, IClinicRepository
+    public class ClinicRepository:Repository<Clinic>,IClinicRepository
     {
-
-        public ClinicRepository(MyContext myContext):base(myContext)
+        public ClinicRepository(MyContext myContext)
+            : base(myContext)
         {
+            
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using MHRSLite_BLL.Contracts;
+using MHRSLite_BLL.EmailService;
 using MHRSLite_EL;
 using MHRSLite_EL.Enums;
 using MHRSLite_EL.IdentityModels;
@@ -14,28 +15,20 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using MHRSLite_BLL.EmailService;
 
-namespace MHRSLiteUI.Areas.Management.Controllers
+namespace MHRSLite_UI.Areas.Management.Controllers
 {
     public class DoctorController : Controller
     {
-        //Global alan
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<AppRole> _roleManager;
         private readonly IEmailSender _emailSender;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
-
         //Dependency Injection
-        public DoctorController(
-            UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager,
-            RoleManager<AppRole> roleManager,
-            IEmailSender emailSender,
-            IUnitOfWork unitOfWork,
-            IConfiguration configuration)
+
+        public DoctorController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<AppRole> roleManager, IEmailSender emailSender, IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -44,13 +37,10 @@ namespace MHRSLiteUI.Areas.Management.Controllers
             _unitOfWork = unitOfWork;
             _configuration = configuration;
         }
-
-
         [HttpGet]
         public IActionResult Register()
         {
             return View();
-
         }
 
         [HttpPost]
@@ -60,21 +50,21 @@ namespace MHRSLiteUI.Areas.Management.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return View(model);
+                    return View();
                 }
                 var checkUserForUserName = await _userManager.FindByNameAsync(model.TCNumber);
                 if (checkUserForUserName != null)
                 {
-                    ModelState.AddModelError(nameof(model.TCNumber), "Bu TCKimlik zaten sistemde kayıtlıdır.");
+                    ModelState.AddModelError(nameof(model.TCNumber), "Bu TC kimlik numarası ile sisteme daha önce kayıt olunmuştur!");
                     return View(model);
                 }
                 var checkUserForEmail = await _userManager.FindByEmailAsync(model.Email);
                 if (checkUserForEmail != null)
                 {
-                    ModelState.AddModelError(nameof(model.Email), "Bu email zaten sistemde kayıtlıdır!");
+                    ModelState.AddModelError(nameof(model.Email), "Bu email ile sisteme daha önce kayıt olunmuştur.");
                     return View(model);
                 }
-                // Yeni kullanıcı oluşturalım
+                //Yeni kullanıcı oluşturalım.
                 AppUser newUser = new AppUser()
                 {
                     Email = model.Email,
@@ -82,15 +72,14 @@ namespace MHRSLiteUI.Areas.Management.Controllers
                     Surname = model.Surname,
                     UserName = model.TCNumber,
                     Gender = model.Gender
-                    //TODO: Birthdate?
-                    //TODO: Phone Number?
+                    //TO DO : Birthdate?
+                    //TO DO : PhoneNumber
                 };
                 var result = await _userManager.CreateAsync(newUser, model.Password);
                 if (result.Succeeded)
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(newUser, RoleNames.PassiveDoctor.ToString());
-
-                    //email gönderilmelidir
+                    var roleResult = _userManager.AddToRoleAsync(newUser, RoleNames.PassiveDoctor.ToString());
+                    //email gönderilmelidir.
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callBackUrl = Url.Action("ConfirmEmail", "Account", new { userId = newUser.Id, code = code }, protocol: Request.Scheme);
@@ -99,11 +88,9 @@ namespace MHRSLiteUI.Areas.Management.Controllers
                     {
                         Contacts = new string[] { newUser.Email },
                         Subject = "MHRSLITE - Email Aktivasyonu",
-                        Body = $"Merhaba Dr. {newUser.Name} {newUser.Surname}, <br/>Hesabınızı aktifleştirmek için <a href='{HtmlEncoder.Default.Encode(callBackUrl)}'>buraya</a> tıklayınız."
+                        Body = $"Merhaba Dr. {newUser.Name} {newUser.Surname},<br> Hesabınızı aktifleştirmek için <a href='{HtmlEncoder.Default.Encode(callBackUrl)}'>buraya<a/> tıklayınız."
                     };
-
                     await _emailSender.SendAsync(emailMessage);
-
                     //doctor tablosuna ekleme yapılmalıdır.
                     Doctor newDoctor = new Doctor()
                     {
@@ -112,17 +99,18 @@ namespace MHRSLiteUI.Areas.Management.Controllers
                     };
                     if (_unitOfWork.DoctorRepository.Add(newDoctor) == false)
                     {
+                        //sistem yöneticisine email gitsin.
                         var emailMessageToAdmin = new EmailMessage()
                         {
-                            Contacts = new string[]
-                        { _configuration.GetSection("ManagerEmails:Email").Value },
+                            Contacts = new string[] { _configuration.GetSection("ManagerEmails:Email").Value },
                             CC = new string[] { _configuration.GetSection("ManagerEmails:EmailToCC").Value },
                             Subject = "MHRSLITE - HATA! Doktor Tablosu",
-                            Body = $"Aşağıdaki bilgilere sahip kişi eklenirken hata olmuş. Doktor Tablosuna bilgileri ekleyiniz. <br/> Bilgiler: TcNumber:{model.TCNumber} <br/> UserId:{newUser.Id}"
+                            Body = $"Aşağıdaki bilgilere sahip kişi eklenirken hata olmuş.Doktor tablosuna bilgileri ekleyiniz. <br/> Bilgiler: TCNumber:{model.TCNumber} <br/> UserId{newUser.Id}"
                         };
                         await _emailSender.SendAsync(emailMessageToAdmin);
                     }
                     return RedirectToAction("Login", "Account");
+
                 }
                 else
                 {

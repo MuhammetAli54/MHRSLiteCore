@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_BLL.Implementations
 {
-   public class PatientRepository:Repository<Patient>, IPatientRepository
+    public class PatientRepository:Repository<Patient>,IPatientRepository
     {
         public PatientRepository(MyContext myContext):base(myContext)
         {

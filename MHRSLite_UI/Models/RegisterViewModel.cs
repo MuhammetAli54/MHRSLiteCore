@@ -9,7 +9,8 @@ namespace MHRSLite_UI.Models
 {
     public class RegisterViewModel
     {
-        [Display(Name = "TC Kimlik Numarası")]
+        [Required(ErrorMessage ="TC Kimlik Numarası alanı gereklidir.")]
+        [Display(Name="TC Kimlik Numarası")]
         [MinLength(11)]
         [StringLength(11, ErrorMessage = "TC Kimlik numarası 11 haneli olmalıdır!")]
         public string TCNumber { get; set; }
@@ -32,13 +33,12 @@ namespace MHRSLite_UI.Models
         [Display(Name = "Şifre")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
-
-        [Required(ErrorMessage = "Cinsiyet seçimi gereklidir.")]
+       
+        [Required(ErrorMessage ="Cinsiyet bilgisi gereklidir!")]
         public Genders Gender { get; set; }
 
         [DataType(DataType.Date)]
-        [Display(Name="Doğum Tarihiniz")]
+        [Display(Name = "Doğum Tarihi")]
         public DateTime? BirthDate { get; set; }
-
     }
 }

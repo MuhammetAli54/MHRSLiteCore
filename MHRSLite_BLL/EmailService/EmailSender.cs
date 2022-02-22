@@ -1,5 +1,4 @@
-﻿using MHRSLite_BLL.EmailService;
-using MHRSLite_EL;
+﻿using MHRSLite_EL;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -19,13 +18,11 @@ namespace MHRSLite_BLL.EmailService
         {
             _configuration = configuration;
         }
-
         public string SenderMail => _configuration.GetSection("EmailOptions:SenderMail").Value;
         public string Password => _configuration.GetSection("EmailOptions:Password").Value;
         public string Smtp => _configuration.GetSection("EmailOptions:Smtp").Value;
         public int SmtpPort => Convert.ToInt32(_configuration.GetSection("EmailOptions:SmtpPort").Value);
         public string CC => _configuration.GetSection("ManagerEmails:EmailToCC").Value;
-
 
         public async Task SendAsync(EmailMessage message)
         {
@@ -38,16 +35,14 @@ namespace MHRSLite_BLL.EmailService
             {
                 mail.To.Add(item);
             }
-
             //CC
-            if (message.CC != null)
+            if (message.CC!=null)
             {
                 foreach (var item in message.CC)
                 {
                     mail.CC.Add(new MailAddress(item));
                 }
             }
-
             if (CC != null)
             {
                 var ccData = CC.Split(',');
@@ -56,7 +51,6 @@ namespace MHRSLite_BLL.EmailService
                     mail.CC.Add(new MailAddress(item));
                 }
             }
-
             //BCC
             if (message.BCC != null)
             {
@@ -73,10 +67,10 @@ namespace MHRSLite_BLL.EmailService
             mail.SubjectEncoding = Encoding.UTF8;
             mail.HeadersEncoding = Encoding.UTF8;
 
-            var smtpClient = new SmtpClient(Smtp, SmtpPort)
+            var smtpClient = new SmtpClient(Smtp,SmtpPort)
             {
-                EnableSsl = true,
-                Credentials = new NetworkCredential(SenderMail, Password)
+                EnableSsl=true,
+                Credentials=new NetworkCredential(SenderMail,Password)
             };
             await smtpClient.SendMailAsync(mail);
         }

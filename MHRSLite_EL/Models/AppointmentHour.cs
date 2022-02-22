@@ -12,7 +12,7 @@ namespace MHRSLite_EL.Models
     public class AppointmentHour:Base<int>
     {
         public int HospitalClinicId { get; set; }
-
+        
         [Required]
         public string Hours { get; set; }
 

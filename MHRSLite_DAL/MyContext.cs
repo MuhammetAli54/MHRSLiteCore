@@ -10,9 +10,10 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_DAL
 {
-    public class MyContext : IdentityDbContext<AppUser, AppRole, string>
+    public class MyContext:IdentityDbContext<AppUser,AppRole,string>
     {
-        public MyContext(DbContextOptions<MyContext> options) : base(options)
+        public MyContext(DbContextOptions<MyContext> options)
+            :base(options)
         {
 
         }

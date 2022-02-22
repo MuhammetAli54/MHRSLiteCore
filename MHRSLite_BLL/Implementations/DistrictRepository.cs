@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_BLL.Implementations
 {
-   public class DistrictRepository : Repository<District>,IDistrictRepository
+    public class DistrictRepository:Repository<District>,IDistrictRepository
     {
-
-        public DistrictRepository(MyContext myContext) : base(myContext)
+        public DistrictRepository(MyContext myContext)
+            :base(myContext)
         {
 
         }

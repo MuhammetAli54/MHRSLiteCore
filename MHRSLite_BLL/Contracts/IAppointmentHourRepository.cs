@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_BLL.Contracts
 {
-   public interface IAppointmentHourRepository:IRepositoryBase<AppointmentHour>
+    public interface IAppointmentHourRepository:IRepositoryBase<AppointmentHour>
     {
     }
 }

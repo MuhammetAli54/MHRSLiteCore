@@ -9,15 +9,12 @@ namespace MHRSLite_EL.Enums
     public class AllEnums
     {
     }
-
-    public enum Genders
+    public enum Genders:byte
     {
-        Belirtilmemiş,
-        Erkek,
-        Kadın
-       
+        Belirtilmemis,
+        Bay,
+        Bayan
     }
-
     public enum RoleNames:byte
     {
         Passive,

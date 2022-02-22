@@ -3,7 +3,6 @@ using MHRSLite_BLL.EmailService;
 using MHRSLite_BLL.Implementations;
 using MHRSLite_DAL;
 using MHRSLite_EL.IdentityModels;
-using MHRSLite_BLL.EmailService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -30,28 +29,28 @@ namespace MHRSLite_UI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //AspNet Core'un Connection String baðlantýsý yapabilmesi için servislerine dbcontext eklenmesi gerekiyor.
+            //Asp.Net Core Connection String baðlantýsý yapabilmesi için servislerine dbcontext eklenmesi gerekir.
             services.AddDbContext<MyContext>(options => 
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SqlConnection"));
             });
-
             //*********************************
-            //IUnitOfWork gördüðün zaman bize IUnitOfWork nesnesi üret!
-            services.AddTransient<IUnitOfWork, UnitOfWork>();
-            //EmailSender gördüðün zaman bize EmailSender nesnesi üret!
-            services.AddTransient<IEmailSender, EmailSender>();
-            //********************************
-            services.AddControllersWithViews();
+            //IUnitOfWork gördüðün zaman bana UnitOfWork nesnesi üret!
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            //IEmailSender gördüðün zaman bana EmailSender nesnesi üret!
+            services.AddScoped<IEmailSender, EmailSender>();
+            //*********************************
+            //services.AddControllersWithViews();
+            services.AddControllersWithViews(x => x.SuppressAsyncSuffixInActionNames = false)
+            .AddRazorRuntimeCompilation();
+            //html,css,js'de deðiþiklik yapýnca projeyi yeniden çalýþtýrmaya gerek kalmaz.
             services.AddRazorPages();
             services.AddMvc();
-            services.AddControllersWithViews().AddRazorRuntimeCompilation();
-            services.AddSession(options => 
+            services.AddSession(options=>
             {
                 options.IdleTimeout = TimeSpan.FromSeconds(60);
             });
-
-            //**********************************
+            //*********************************
             services.AddIdentity<AppUser, AppRole>(opts =>
             {
                 opts.User.RequireUniqueEmail = true;
@@ -60,9 +59,8 @@ namespace MHRSLite_UI
                 opts.Password.RequireLowercase = false;
                 opts.Password.RequireUppercase = false;
                 opts.Password.RequireDigit = false;
-                opts.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
+                opts.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._+";
             }).AddDefaultTokenProviders().AddEntityFrameworkStores<MyContext>();
-            //**********************************
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,15 +74,9 @@ namespace MHRSLite_UI
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseStaticFiles();
+            app.UseStaticFiles();//wwwroot klasörünün kullanýlabilmesi için
             app.UseRouting(); //rooting mekanizmasý için
-            app.UseSession();
+            app.UseSession();//session için
             app.UseAuthentication(); //login logout kullanabilmek için
             app.UseAuthorization(); //authorization attiribute kullanabilmek için
 
@@ -93,6 +85,12 @@ namespace MHRSLite_UI
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+                endpoints.MapAreaControllerRoute(
+                    "management",
+                    "management",
+                    "management/{controller=Admin}/{action=Index}/{id?}"
+                    );
             });
         }
     }

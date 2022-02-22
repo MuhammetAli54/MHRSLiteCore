@@ -7,7 +7,13 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_BLL.Contracts
 {
-   public interface IDoctorRepository:IRepositoryBase<Doctor>
+    public interface IDoctorRepository:IRepositoryBase<Doctor>
     {
+        //İŞLEM SIRASI
+
+        //interface
+        //implement
+        //iunitofwork
+        //unitofwork(injection ve implement)
     }
 }

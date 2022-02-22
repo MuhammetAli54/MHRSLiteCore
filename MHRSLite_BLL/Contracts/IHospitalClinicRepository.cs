@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_BLL.Contracts
 {
-    public interface IHospitalClinicRepository : IRepositoryBase<HospitalClinic>
+    public interface IHospitalClinicRepository:IRepositoryBase<HospitalClinic>
     {
     }
 }

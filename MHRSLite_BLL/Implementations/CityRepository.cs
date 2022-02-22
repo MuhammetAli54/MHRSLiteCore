@@ -11,8 +11,8 @@ namespace MHRSLite_BLL.Implementations
 {
     public class CityRepository:Repository<City>,ICityRepository
     {
-
-        public CityRepository(MyContext myContext):base(myContext)
+        public CityRepository(MyContext myContext)
+            :base(myContext)
         {
 
         }

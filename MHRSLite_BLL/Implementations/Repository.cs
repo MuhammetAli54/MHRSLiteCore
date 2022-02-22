@@ -4,19 +4,23 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace MHRSLite_BLL.Implementations
 {
-    public class Repository<T> : IRepositoryBase<T> where T : class, new()
+    public class Repository<T>:IRepositoryBase<T> where T: class,new()
     {
+        //private readonly MyContext _myContext;
+        //_myContext nesnesi protected olursa kalıtımla gittiği yerlerde de private şekilde kullanılır.
         protected readonly MyContext _myContext;
+
         public Repository(MyContext myContext)
         {
             _myContext = myContext;
         }
-
+        //IRepositoryBase'e implement ekleyerek alttaki metotları otomatik oluşturduk.
         public bool Add(T entity)
         {
             try
@@ -26,10 +30,11 @@ namespace MHRSLite_BLL.Implementations
                 result = _myContext.SaveChanges() > 0 ? true : false;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
-            }
+
+                throw ex;
+            }            
         }
 
         public bool Delete(T entity)
@@ -41,9 +46,10 @@ namespace MHRSLite_BLL.Implementations
                 result = _myContext.SaveChanges() > 0 ? true : false;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+
+                throw ex;
             }
         }
 
@@ -55,19 +61,23 @@ namespace MHRSLite_BLL.Implementations
             }
             catch (Exception)
             {
+
                 throw;
             }
         }
 
-        public IQueryable<T> GetAll(System.Linq.Expressions.Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = null)
+        public IQueryable<T> GetAll(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = null)
         {
             try
             {
                 IQueryable<T> query = _myContext.Set<T>();
+
+                //myCustomerRepo.Queryable().Where()
                 if (filter != null)
                 {
                     query = query.Where(filter);
                 }
+                //ilişkili olduğu tabloyu dahil etmek amacıyla include yapısı eklendi.
                 if (includeProperties != null)
                 {
                     foreach (var item in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
@@ -75,6 +85,7 @@ namespace MHRSLite_BLL.Implementations
                         query = query.Include(item);
                     }
                 }
+
                 if (orderBy!=null)
                 {
                     return orderBy(query);
@@ -83,22 +94,26 @@ namespace MHRSLite_BLL.Implementations
             }
             catch (Exception)
             {
+
                 throw;
             }
         }
 
-        public T GetFirstOrDefault(System.Linq.Expressions.Expression<Func<T, bool>> filter = null, string includeProperties = null)
+        public T GetFirstOrDefault(Expression<Func<T, bool>> filter = null, string includeProperties = null)
         {
             try
             {
                 IQueryable<T> query = _myContext.Set<T>();
+
+                //myCustomerRepo.Queryable().Where()
                 if (filter!=null)
                 {
                     query = query.Where(filter);
                 }
+                //ilişkili olduğu tabloyu dahil etmek amacıyla include yapısı eklendi.
                 if (includeProperties!=null)
                 {
-                    foreach (var item in includeProperties.Split(new char[] {','},StringSplitOptions.RemoveEmptyEntries))
+                    foreach (var item in includeProperties.Split(new char[] { ',' },StringSplitOptions.RemoveEmptyEntries))
                     {
                         query = query.Include(item);
                     }
@@ -107,6 +122,7 @@ namespace MHRSLite_BLL.Implementations
             }
             catch (Exception)
             {
+
                 throw;
             }
         }
@@ -122,6 +138,7 @@ namespace MHRSLite_BLL.Implementations
             }
             catch (Exception)
             {
+
                 throw;
             }
         }

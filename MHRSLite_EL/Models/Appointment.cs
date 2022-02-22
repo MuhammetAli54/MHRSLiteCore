@@ -8,22 +8,21 @@ using System.Threading.Tasks;
 
 namespace MHRSLite_EL.Models
 {
-    [Table("Appointment")]
-    public class Appointment : Base<int>
+    [Table("Appointments")]
+    public class Appointment:Base<int>
     {
         public string PatientId { get; set; }
+
         public int HospitalClinicId { get; set; }
 
         [Required]
         public DateTime AppointmentDate { get; set; }
 
         [Required]
-        [StringLength(5,MinimumLength =5,ErrorMessage ="Randevu saati XX:XX şeklinde olmalıdır!")]
-        public DateTime AppointmentHour { get; set; }
-
+        [StringLength(5,MinimumLength =5,ErrorMessage ="Randevu saati XX:XX şeklinde olmalıdır")]
+        public string AppointmentHour { get; set; } //10:00
         [ForeignKey("PatientId")]
         public virtual Patient Patient { get; set; }
-
         [ForeignKey("HospitalClinicId")]
         public virtual HospitalClinic HospitalClinic { get; set; }
     }
