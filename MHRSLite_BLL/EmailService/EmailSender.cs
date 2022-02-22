@@ -9,7 +9,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MHRSLiteBusinessLayer.EmailService
+namespace MHRSLite_BLL.EmailService
 {
     public class EmailSender : IEmailSender
     {

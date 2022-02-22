@@ -22,6 +22,8 @@ namespace MHRSLite_EL.Enums
     {
         Passive,
         Admin,
-        Patient
+        Patient,
+        PassiveDoctor,
+        ActiveDoctor
     }
 }

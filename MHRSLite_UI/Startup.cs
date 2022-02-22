@@ -3,6 +3,7 @@ using MHRSLite_BLL.EmailService;
 using MHRSLite_BLL.Implementations;
 using MHRSLite_DAL;
 using MHRSLite_EL.IdentityModels;
+using MHRSLite_BLL.EmailService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;

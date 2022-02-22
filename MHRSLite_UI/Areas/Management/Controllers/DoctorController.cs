@@ -1,10 +1,9 @@
 ﻿using MHRSLite_BLL.Contracts;
-using MHRSLite_BLL.EmailService;
 using MHRSLite_EL;
 using MHRSLite_EL.Enums;
 using MHRSLite_EL.IdentityModels;
 using MHRSLite_EL.Models;
-using MHRSLiteUI.Areas;
+using MHRSLite_UI.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -15,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using MHRSLite_BLL.EmailService;
 
 namespace MHRSLiteUI.Areas.Management.Controllers
 {
