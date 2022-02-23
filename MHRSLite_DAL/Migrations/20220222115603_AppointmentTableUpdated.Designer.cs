@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MHRSLite_DAL.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20220211083715_BaseIdUpdated")]
-    partial class BaseIdUpdated
+    [Migration("20220222115603_AppointmentTableUpdated")]
+    partial class AppointmentTableUpdated
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -74,8 +74,8 @@ namespace MHRSLite_DAL.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Gender")
-                        .HasColumnType("int");
+                    b.Property<byte>("Gender")
+                        .HasColumnType("tinyint");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -149,9 +149,10 @@ namespace MHRSLite_DAL.Migrations
                     b.Property<DateTime>("AppointmentDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("AppointmentHour")
+                    b.Property<string>("AppointmentHour")
+                        .IsRequired()
                         .HasMaxLength(5)
-                        .HasColumnType("datetime2");
+                        .HasColumnType("nvarchar(5)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -160,6 +161,7 @@ namespace MHRSLite_DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PatientId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(11)");
 
                     b.HasKey("Id");
@@ -168,7 +170,7 @@ namespace MHRSLite_DAL.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Appointment");
+                    b.ToTable("Appointments");
                 });
 
             modelBuilder.Entity("MHRSLite_EL.Models.AppointmentHour", b =>
@@ -284,16 +286,33 @@ namespace MHRSLite_DAL.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("DistrictId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("HospitalName")
                         .IsRequired()
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("Latitude")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Longitude")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
 
@@ -316,9 +335,6 @@ namespace MHRSLite_DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DoctorId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DoktorId")
                         .HasColumnType("nvarchar(11)");
 
                     b.Property<int>("HospitalId")
@@ -328,7 +344,7 @@ namespace MHRSLite_DAL.Migrations
 
                     b.HasIndex("ClinicId");
 
-                    b.HasIndex("DoktorId");
+                    b.HasIndex("DoctorId");
 
                     b.HasIndex("HospitalId");
 
@@ -465,7 +481,9 @@ namespace MHRSLite_DAL.Migrations
 
                     b.HasOne("MHRSLite_EL.Models.Patient", "Patient")
                         .WithMany("PatientAppointments")
-                        .HasForeignKey("PatientId");
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("HospitalClinic");
 
@@ -524,7 +542,7 @@ namespace MHRSLite_DAL.Migrations
 
                     b.HasOne("MHRSLite_EL.Models.Doctor", "Doctor")
                         .WithMany("HospitalClinics")
-                        .HasForeignKey("DoktorId");
+                        .HasForeignKey("DoctorId");
 
                     b.HasOne("MHRSLite_EL.Models.Hospital", "Hospital")
                         .WithMany("HospitalClinics")

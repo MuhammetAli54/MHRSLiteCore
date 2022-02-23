@@ -159,6 +159,7 @@ namespace MHRSLite_DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PatientId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(11)");
 
                     b.HasKey("Id");
@@ -478,7 +479,9 @@ namespace MHRSLite_DAL.Migrations
 
                     b.HasOne("MHRSLite_EL.Models.Patient", "Patient")
                         .WithMany("PatientAppointments")
-                        .HasForeignKey("PatientId");
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("HospitalClinic");
 

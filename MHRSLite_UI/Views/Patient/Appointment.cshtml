@@ -186,8 +186,10 @@
 
             //Yeni pencerede uygun randevular listelenecek.
             //il*, ilçe, klinik*, hastane, hekim
-           /* window.open('/Patient/FindAppointment?cityid=' + cityid + '&distid=' + distid + '&cid=' + cid + '&hid=' + hid + '&dr=' + dr);*/
-            window.open('/Patient/FindAppointment?cityid=' + cityid + '&distid=' + distid + '&cid=' + cid + '&hid=' + hid);
+            /* window.open('/Patient/FindAppointment?cityid=' + cityid + '&distid=' + distid + '&cid=' + cid + '&hid=' + hid + '&dr=' + dr);*/
+
+            window.open('/Patient/FindAppointment?cityid=' + cityid +
+                '&distid=' + distid + '&cid=' + cid + '&hid=' + hid, "_self");
 
         });
 
