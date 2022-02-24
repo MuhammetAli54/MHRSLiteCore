@@ -46,10 +46,13 @@
                             {
                                 prevData = Model[i - 1].HourBase.Substring(0, 2);
                             }
+
+
+
                             <div class="accordion-item">
                                 @if (string.IsNullOrEmpty(prevData)
-                                     || prevData != Model[i].HourBase.Substring(0, 2)
-                                  )
+                                    || prevData != Model[i].HourBase.Substring(0, 2)
+                                 )
                                 {
                                     { sayac++; }
                                     <h2 class="accordion-header" id="heading@(sayac)">
