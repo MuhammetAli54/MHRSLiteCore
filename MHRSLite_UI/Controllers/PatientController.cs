@@ -69,6 +69,8 @@ namespace MHRSLite_UI.Controllers
         {
             try
             {
+                TempData["ClinicId"] = cid;
+                TempData["HospitalId"] = hid.Value;
                 //Dışarıdan gelen ClinicId ' nin olduğu HospitalClinic kayıtlarını al.
                 var data = _unitOfWork.HospitalClinicRepository
                     .GetAll(x => x.ClinicId == cid && x.HospitalId == hid.Value)
@@ -108,14 +110,14 @@ namespace MHRSLite_UI.Controllers
                             {
                                 list.Add(new AvailableDoctorAppointmentViewModel()
                                 {
-                                    HospitalClinicId=subitem.HospitalClinicId,
-                                    ClinicId=hospitalClinicData.ClinicId,
-                                    HospitalId=hospitalClinicData.HospitalId,
-                                    DoctorTCNumber=hospitalClinicData.DoctorId,
-                                    Doctor=_unitOfWork.DoctorRepository.GetFirstOrDefault(x=> x.TCNumber==hospitalClinicData.DoctorId,includeProperties:"AppUser"),
-                                    Hospital=_unitOfWork.HospitalRepository.GetFirstOrDefault(x=> x.Id==hospitalClinicData.HospitalId),
-                                    Clinic=_unitOfWork.ClinicRepository.GetFirstOrDefault(x=> x.Id==hospitalClinicData.ClinicId),
-                                    HospitalClinic=hospitalClinicData
+                                    HospitalClinicId = subitem.HospitalClinicId,
+                                    ClinicId = hospitalClinicData.ClinicId,
+                                    HospitalId = hospitalClinicData.HospitalId,
+                                    DoctorTCNumber = hospitalClinicData.DoctorId,
+                                    Doctor = _unitOfWork.DoctorRepository.GetFirstOrDefault(x => x.TCNumber == hospitalClinicData.DoctorId, includeProperties: "AppUser"),
+                                    Hospital = _unitOfWork.HospitalRepository.GetFirstOrDefault(x => x.Id == hospitalClinicData.HospitalId),
+                                    Clinic = _unitOfWork.ClinicRepository.GetFirstOrDefault(x => x.Id == hospitalClinicData.ClinicId),
+                                    HospitalClinic = hospitalClinicData
                                 });
                                 break;
                             }
@@ -144,7 +146,9 @@ namespace MHRSLite_UI.Controllers
                 var hospitalClinicData =
                          _unitOfWork.HospitalClinicRepository
                          .GetFirstOrDefault(x => x.Id == hcid);
-
+                Doctor dr = _unitOfWork.DoctorRepository.GetFirstOrDefault(x => x.TCNumber ==
+                hospitalClinicData.DoctorId, includeProperties: "AppUser");
+                ViewBag.Doctor = "Dr." + dr.AppUser.Name + " " + dr.AppUser.UserName;
                 var hours = data.Hours.Split(',');
                 var appointment = _unitOfWork
                     .AppointmentRepository
@@ -163,10 +167,9 @@ namespace MHRSLite_UI.Controllers
                         new AvailableDoctorAppointmentHoursViewModel()
                         {
                             AppointmentDate = DateTime.Now.AddDays(1),
-                            Doctor =
-                               _unitOfWork.DoctorRepository
-                               .GetFirstOrDefault(x => x.TCNumber == hospitalClinicData.DoctorId),
-                            HourBase = myHourBase
+                            Doctor = dr,
+                            HourBase = myHourBase,
+                            HospitalClinicId=hcid
                         };
                     list.Add(appointmentHourData);
                     if (appointment.Count(
@@ -192,8 +195,6 @@ namespace MHRSLite_UI.Controllers
             }
 
         }
-
-
 
         [Authorize]
         public IActionResult FindAppointment_OncekiVersiyon(int cityid, int? distid, int cid, int? hid, int? dr)
@@ -266,7 +267,7 @@ namespace MHRSLite_UI.Controllers
         }
 
         [Authorize]
-        public IActionResult SaveAppointment(int hid, string date, string hour)
+        public IActionResult SaveAppointment(int hcid, string date, string hour)
         {
             try
             {
@@ -285,7 +286,7 @@ namespace MHRSLite_UI.Controllers
                 {
                     CreatedDate = DateTime.Now,
                     PatientId = HttpContext.User.Identity.Name,
-                    HospitalClinicId = hid,
+                    HospitalClinicId = hcid,
                     AppointmentDate = appointmentDate,
                     AppointmentHour = hour
                 };

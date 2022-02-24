@@ -14,6 +14,7 @@ namespace MHRSLite_UI.Models
         //saat detayları
 
         public Doctor Doctor { get; set; }
+        public int HospitalClinicId { get; set; }
         public DateTime AppointmentDate { get; set; }
         public string HourBase { get; set; }
         public List<string> Hours { get; set; } = new List<string>();
