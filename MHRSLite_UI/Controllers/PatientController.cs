@@ -277,8 +277,9 @@ namespace MHRSLite_UI.Controllers
         }
 
         [Authorize]
-        public IActionResult SaveAppointment(int hcid, string date, string hour)
+        public JsonResult SaveAppointment(int hcid, string date, string hour)
         {
+            var message = string.Empty;
             try
             {
                 //Aynı tarihe ve saate başka randevusu var mı?
@@ -287,8 +288,8 @@ namespace MHRSLite_UI.Controllers
                     (x => x.AppointmentDate == appointmentDate && x.AppointmentHour == hour) != null)
                 {
                     //Aynı tarih ve saate başka randevusu var
-                    TempData["SaveAppointmentStatus"] = $"{date} - {hour} tarihinde bir kliniğe zaten randevu almışsınız. Aynı tarih ve saate başka randevu alınamaz!";
-                    return RedirectToAction("Index", "Patient");
+                    message = $"{date} - {hour} tarihinde bir kliniğe zaten randevu almışsınız. Aynı tarih ve saate başka randevu alınamaz!";
+                    return Json(new { isSuccess = false, message });
                 }
 
                 //randevu kayıt edilecek
@@ -301,13 +302,15 @@ namespace MHRSLite_UI.Controllers
                     AppointmentHour = hour
                 };
                 var result = _unitOfWork.AppointmentRepository.Add(patientAppointment);
-                TempData["SaveAppointmentStatus"] = result ? "Randevunuz başarıyla kaydolmuştur." : "HATA: Beklenmedik bir hata oluştu!";
-                return RedirectToAction("Index", "Patient");
+
+                message = result ? "Randevunuz başarıyla kaydolmuştur." : "HATA: Beklenmedik bir hata oluştu!";
+                return result ? Json(new { isSuccess = true, message }) :
+                                Json(new { isSuccess = false, message });
             }
             catch (Exception ex)
             {
-                TempData["SaveAppointmentStatus"] = "HATA: " + ex.Message;
-                return RedirectToAction("Index", "Patient");
+                message = "HATA: " + ex.Message;
+                return Json(new { isSuccess = false, message });
             }
         }
     }
