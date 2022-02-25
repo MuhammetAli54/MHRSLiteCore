@@ -2,7 +2,9 @@ using MHRSLite_BLL.Contracts;
 using MHRSLite_BLL.EmailService;
 using MHRSLite_BLL.Implementations;
 using MHRSLite_DAL;
+using MHRSLite_EL.Enums;
 using MHRSLite_EL.IdentityModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -39,8 +41,14 @@ namespace MHRSLite_UI
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             //IEmailSender gördüðün zaman bana EmailSender nesnesi üret!
             services.AddScoped<IEmailSender, EmailSender>();
+            //IClaimsTransformation gördüðü zaman bizim yazdýðýmýz classý üretecek.
+            services.AddScoped<IClaimsTransformation, ClaimProvider.ClaimProvider>();
             //*********************************
-            //services.AddControllersWithViews();
+            services.AddAuthorization(opts =>
+            {
+                opts.AddPolicy("GenderPolicy", policy =>
+                 policy.RequireClaim("gender", Genders.Bay.ToString()));
+            });
             services.AddControllersWithViews(x => x.SuppressAsyncSuffixInActionNames = false)
             .AddRazorRuntimeCompilation();
             //html,css,js'de deðiþiklik yapýnca projeyi yeniden çalýþtýrmaya gerek kalmaz.

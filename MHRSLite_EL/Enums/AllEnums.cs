@@ -23,4 +23,12 @@ namespace MHRSLite_EL.Enums
         PassiveDoctor,
         ActiveDoctor
     }
+
+    public enum AppointmentStatus:byte
+    {
+        Active=1,
+        Pass=0,
+        Cancelled=2
+    }
+
 }
