@@ -1,5 +1,7 @@
-﻿using MHRSLite_BLL.Contracts;
+﻿using ClosedXML.Excel;
+using MHRSLite_BLL.Contracts;
 using MHRSLite_BLL.EmailService;
+using MHRSLite_EL;
 using MHRSLite_EL.Enums;
 using MHRSLite_EL.IdentityModels;
 using MHRSLite_EL.Models;
@@ -10,6 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,10 +40,12 @@ namespace MHRSLite_UI.Controllers
         }
 
         [Authorize]
-        public IActionResult Index()
+        public IActionResult Index(int pageNumberPast = 1, int pageNumberFuture = 1)
         {
             try
             {
+                ViewBag.PageNumberPast = pageNumberPast;
+                ViewBag.PageNumberFuture = pageNumberFuture;
                 return View();
             }
             catch (Exception ex)
@@ -306,6 +312,24 @@ namespace MHRSLite_UI.Controllers
                 var result = _unitOfWork.AppointmentRepository.Add(patientAppointment);
 
                 message = result ? "Randevunuz başarıyla kaydolmuştur." : "HATA: Beklenmedik bir hata oluştu!";
+                if (result)
+                {
+                    //randevu bilgilerini pdf olarak emaille gönderilmesi isteniyor.
+                    var data = _unitOfWork.AppointmentRepository.GetAppointmentByID(
+                        HttpContext.User.Identity.Name,
+                        patientAppointment.HospitalClinicId,
+                        patientAppointment.AppointmentDate,
+                        patientAppointment.AppointmentHour);
+
+                    var user = _userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
+                    var emailMessage = new EmailMessage()
+                    {
+                        Contacts= new string[] { },
+                        Subject= "MHRSLite - Randevu Bilgileri",
+                        Body=$"Merhaba {user.Name} {user.Surname}, <br/> randevu bilgileriniz pdf olarak ektedir."
+                    };
+                    _emailSender.SendAppointmentPdf(emailMessage, data);
+                }
                 return result ? Json(new { isSuccess = true, message }) :
                                 Json(new { isSuccess = false, message });
             }
@@ -313,6 +337,85 @@ namespace MHRSLite_UI.Controllers
             {
                 message = "HATA: " + ex.Message;
                 return Json(new { isSuccess = false, message });
+            }
+        }
+
+        [Authorize]
+        public JsonResult CancelAppointment(int id)
+        {
+            var message = string.Empty;
+            try
+            {
+                var appointment = _unitOfWork.AppointmentRepository.GetFirstOrDefault(x => x.Id == id);
+                if (appointment!=null)
+                {
+                    appointment.AppointmentStatus = AppointmentStatus.Cancelled;
+                    var result = _unitOfWork.AppointmentRepository.Update(appointment);
+                    message = result ? 
+                        "Randevunuz iptal edildi!" : 
+                        "HATA: Beklenmedik sorun oluştu!";
+                    return result ?
+                        Json(new { isSuccess = true, message }) :
+                        Json(new { isSuccess = false, message });
+                }
+                else
+                {
+                    message = "HATA: Randevu bulunamadığı için iptal edilemedi! Tekrar deneyiniz!";
+                    return Json(new { isSuccess = false, message });
+                }
+            }
+            catch (Exception ex)
+            {
+                message = "HATA:" + ex.Message;
+                return Json(new { isSuccess = false, message });
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        public IActionResult UpComingAppointmentExcelExport()
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+                var patientId = HttpContext.User.Identity.Name;
+                var data = _unitOfWork.AppointmentRepository.GetUpComingAppointments(patientId);
+                dt.Columns.Add("İL");
+                dt.Columns.Add("İLÇE");
+                dt.Columns.Add("HASTANE");
+                dt.Columns.Add("KLİNİK");
+                dt.Columns.Add("DOKTOR");
+                dt.Columns.Add("RANDEVU TARİHİ");
+                dt.Columns.Add("RANDEVU SAATİ");
+
+                foreach (var item in data)
+                {
+                    var Doktor = item.HospitalClinic.Doctor.AppUser.Name + " " + item.HospitalClinic.Doctor.AppUser.Surname;
+                    dt.Rows.Add(
+                        item.HospitalClinic.Hospital.HospitalDistrict.City.CityName,
+                        item.HospitalClinic.Hospital.HospitalDistrict.DistrictName,
+                        item.HospitalClinic.Hospital.HospitalName,
+                        item.HospitalClinic.Clinic.ClinicName,
+                        Doktor,
+                        item.AppointmentDate,
+                        item.AppointmentHour);
+                }
+                //EXCEL oluştur
+                using (XLWorkbook wb = new XLWorkbook())
+                {
+                    wb.Worksheets.Add(dt);
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        wb.SaveAs(stream);
+                        //return File ile dosya otomatik iner.
+                        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }
