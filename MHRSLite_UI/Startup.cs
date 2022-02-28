@@ -13,9 +13,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using MHRSLite_EL.Mappings;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace MHRSLite_UI
 {
@@ -44,6 +46,7 @@ namespace MHRSLite_UI
             //IClaimsTransformation gördüðü zaman bizim yazdýðýmýz classý üretecek.
             services.AddScoped<IClaimsTransformation, ClaimProvider.ClaimProvider>();
             //*********************************
+            services.AddAutoMapper(typeof(Maps));
             services.AddAuthorization(opts =>
             {
                 opts.AddPolicy("GenderPolicy", policy =>
