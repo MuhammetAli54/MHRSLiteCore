@@ -50,7 +50,6 @@ namespace MHRSLite_UI.Controllers
             }
             catch (Exception ex)
             {
-
                 return View();
             }
         }
@@ -377,7 +376,7 @@ namespace MHRSLite_UI.Controllers
         {
             try
             {
-                DataTable dt = new DataTable();
+                DataTable dt = new DataTable("Grid");
                 var patientId = HttpContext.User.Identity.Name;
                 var data = _unitOfWork.AppointmentRepository.GetUpComingAppointments(patientId);
                 dt.Columns.Add("İL");

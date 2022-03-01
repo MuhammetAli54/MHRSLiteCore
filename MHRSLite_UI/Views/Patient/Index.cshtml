@@ -5,9 +5,9 @@
 }
 @if (!string.IsNullOrEmpty(TempData["SaveAppointmentStatus"] as String))
 {
-   <div class="alert alert-success" role="alert">
-         @TempData["SaveAppointmentStatus"]
-   </div>
+    <div class="alert alert-success" role="alert">
+        @TempData["SaveAppointmentStatus"]
+    </div>
 }
 
 <div style="background-color:#ffffff; border-radius: 18px; margin:30px;">
@@ -28,10 +28,60 @@
                 </div>
             </div>
             <div class="col-md-8" style="padding-top:30px;">
-                @await Component.InvokeAsync("PatientAppointments", new {
+                @await Component.InvokeAsync("PatientAppointments", new
+                {
                pageNumberPast = ViewBag.PageNumberPast,
-               pageNumberFuture = ViewBag.PageNumberFuture})
+               pageNumberFuture = ViewBag.PageNumberFuture
+                })
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts{
+    <script type="text/javascript">
+        const { error } = require("jquery");
+
+        //arrow function
+        function CancelAppointmentsBtnClicked(id) {
+            Swal.fire({
+                title: 'Randevuyu iptal etmek istediğinize emin misiniz?',
+                showDenyButton: false,
+                showConfirmButton: true,
+                confirmButtonText: 'Onayla',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    //randevuyu iptal edecek actiona ulaşması gerekli.
+                    $.ajax({
+                        type: "GET",
+                        url: '/Patient/CancelAppointment/' + id,
+                        success: function (res) {
+                            Swal.fire({
+                                title: res.message,
+                                showDenyButton: false,
+                                showCancelButton: false
+                            }).then((result) => {
+                                window.open("/Patient/Index", "_self");
+                            });
+                        },
+                        error: function (err) {
+                            Swal.fire(err, '', 'danger');
+                        }
+                    });
+                }
+            });
+        }
+
+        function UpcomingAppointmentsExcelBtnClicked() {
+            $.ajax({
+                type: "POST",
+                url: '/Patient/UpcomingAppointmentExcelExport',
+                success: function (res) { },
+                error: function (err) {
+                    Swal.fire(err, '', 'danger')
+                }
+            });
+        }
+    </script>
+}
