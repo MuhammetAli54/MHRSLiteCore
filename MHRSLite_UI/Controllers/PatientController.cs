@@ -145,13 +145,10 @@ namespace MHRSLite_UI.Controllers
         {
             try
             {
-
                 var list = new List<AvailableDoctorAppointmentHoursViewModel>();
-
                 var data = _unitOfWork.
                     AppointmentHourRepository.
                     GetFirstOrDefault(x => x.HospitalClinicId == hcid);
-
                 var hospitalClinicData =
                          _unitOfWork.HospitalClinicRepository
                          .GetFirstOrDefault(x => x.Id == hcid);
@@ -159,8 +156,6 @@ namespace MHRSLite_UI.Controllers
                     .GetFirstOrDefault(x => x.TCNumber == hospitalClinicData.DoctorId
                     , includeProperties: "AppUser");
                 ViewBag.Doctor = "Dr." + dr.AppUser.Name + " " + dr.AppUser.Surname;
-
-
                 var hours = data.Hours.Split(',');
 
                 var appointment = _unitOfWork
@@ -171,7 +166,7 @@ namespace MHRSLite_UI.Controllers
                     (x.AppointmentDate > DateTime.Now.AddDays(-1)
                     &&
                     x.AppointmentDate < DateTime.Now.AddDays(2)
-                    )
+                    ) && x.AppointmentStatus!= AppointmentStatus.Cancelled
                     ).ToList();
 
                 foreach (var houritem in hours)
@@ -291,7 +286,8 @@ namespace MHRSLite_UI.Controllers
                 //Aynı tarihe ve saate başka randevusu var mı?
                 DateTime appointmentDate = Convert.ToDateTime(date);
                 if (_unitOfWork.AppointmentRepository.GetFirstOrDefault
-                    (x => x.AppointmentDate == appointmentDate && x.AppointmentHour == hour) != null)
+                    (x => x.AppointmentDate == appointmentDate && x.AppointmentHour == hour &&
+                    x.AppointmentStatus!=AppointmentStatus.Cancelled) != null)
                 {
                     //Aynı tarih ve saate başka randevusu var
                     message = $"{date} - {hour} tarihinde bir kliniğe zaten randevu almışsınız. Aynı tarih ve saate başka randevu alınamaz!";
