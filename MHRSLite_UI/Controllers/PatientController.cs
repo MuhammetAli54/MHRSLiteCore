@@ -373,7 +373,7 @@ namespace MHRSLite_UI.Controllers
 
         [Authorize]
         [HttpPost]
-        public IActionResult UpComingAppointmentExcelExport()
+        public IActionResult UpcomingAppointmentExcelExport()
         {
             try
             {
