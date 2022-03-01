@@ -15,6 +15,7 @@ namespace MHRSLite_EL.PagingListModels
         {
             PageIndex = pageindex;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+            this.AddRange(items);
             ItemList = items;
         }
         public bool PreviousPage
