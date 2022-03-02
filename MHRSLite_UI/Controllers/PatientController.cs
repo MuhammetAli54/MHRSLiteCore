@@ -2,6 +2,7 @@
 using MHRSLite_BLL.Contracts;
 using MHRSLite_BLL.EmailService;
 using MHRSLite_EL;
+using MHRSLite_EL.Constants;
 using MHRSLite_EL.Enums;
 using MHRSLite_EL.IdentityModels;
 using MHRSLite_EL.Models;
@@ -166,7 +167,7 @@ namespace MHRSLite_UI.Controllers
                     (x.AppointmentDate > DateTime.Now.AddDays(-1)
                     &&
                     x.AppointmentDate < DateTime.Now.AddDays(2)
-                    ) && x.AppointmentStatus!= AppointmentStatus.Cancelled
+                    ) && x.AppointmentStatus != AppointmentStatus.Cancelled
                     ).ToList();
 
                 foreach (var houritem in hours)
@@ -287,12 +288,27 @@ namespace MHRSLite_UI.Controllers
                 DateTime appointmentDate = Convert.ToDateTime(date);
                 if (_unitOfWork.AppointmentRepository.GetFirstOrDefault
                     (x => x.AppointmentDate == appointmentDate && x.AppointmentHour == hour &&
-                    x.AppointmentStatus!=AppointmentStatus.Cancelled) != null)
+                    x.AppointmentStatus != AppointmentStatus.Cancelled) != null)
                 {
                     //Aynı tarih ve saate başka randevusu var
-                    message = $"{date} - {hour} tarihinde bir kliniğe zaten randevu almışsınız. Aynı tarih ve saate başka randevu alınamaz!";
+                    message = $"{date} - {hour} tarihinde bir kliniğe zaten randevu almışsınız. " +
+                        $"Aynı tarih ve saate başka randevu alınamaz!";
                     return Json(new { isSuccess = false, message });
                 }
+                #region RomatologyAppointment_ClaimsCheck
+                //eğer romotoloji randevusu istenmişse
+                var hcidData = _unitOfWork.HospitalClinicRepository.GetFirstOrDefault(x =>
+                x.Id == hcid, includeProperties: "Hospital,Clinic,Doctor");
+                if (hcidData.Clinic.ClinicName == ClinicsConstants.ROMATOLOGY)
+                {
+                    //Claim kontrolü yapılacak
+                    string resultMessage = AvailabilityMessageForRomatologyAppointment(hcidData);
+                    if (!string.IsNullOrEmpty(resultMessage))
+                    {
+                        return Json(new { isSuccess = false, message = resultMessage });
+                    }
+                }
+                #endregion
 
                 //randevu kayıt edilecek
                 Appointment patientAppointment = new Appointment()
@@ -302,7 +318,7 @@ namespace MHRSLite_UI.Controllers
                     HospitalClinicId = hcid,
                     AppointmentDate = appointmentDate,
                     AppointmentHour = hour,
-                    AppointmentStatus=AppointmentStatus.Active
+                    AppointmentStatus = AppointmentStatus.Active
                 };
                 var result = _unitOfWork.AppointmentRepository.Add(patientAppointment);
 
@@ -319,9 +335,9 @@ namespace MHRSLite_UI.Controllers
                     var user = _userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
                     var emailMessage = new EmailMessage()
                     {
-                        Contacts= new string[] { },
-                        Subject= "MHRSLite - Randevu Bilgileri",
-                        Body=$"Merhaba {user.Name} {user.Surname}, <br/> randevu bilgileriniz pdf olarak ektedir."
+                        Contacts = new string[] { },
+                        Subject = "MHRSLite - Randevu Bilgileri",
+                        Body = $"Merhaba {user.Name} {user.Surname}, <br/> randevu bilgileriniz pdf olarak ektedir."
                     };
                     _emailSender.SendAppointmentPdf(emailMessage, data);
                 }
@@ -335,6 +351,41 @@ namespace MHRSLite_UI.Controllers
             }
         }
 
+        private string AvailabilityMessageForRomatologyAppointment(HospitalClinic hcidData)
+        {
+            try
+            {
+                string returnMessage = string.Empty;
+                //user a ait aspnetuserclaims tablosunda kayıt varsa o kayıtlardan dahiliye-romatoloji kaydının valuesu alınacak
+                var claimList = HttpContext.User.Claims.ToList();
+                var claim = claimList.FirstOrDefault(x => x.Type == "DahiliyeRomatoloji");
+                if (claim != null)
+                {
+                    var claimValue = claim.Value;
+                    string[] array = claimValue.Split('_');
+                    int claimHCID = Convert.ToInt32(array[0]);
+                    DateTime claimDate = Convert.ToDateTime(array[1].ToString());
+
+                    var claimHCIDdata = _unitOfWork.HospitalClinicRepository.GetFirstOrDefault(x => x.Id == claimHCID, includeProperties: "Hospital");
+                    //Claimdeki bilgiler ayıklandı.
+                    //Acaba ayıklanan bilgilerdeki hastane ile randevu alınmak istenen hastane aynı mı değil mi ?
+                    if (hcidData.Hospital.Id != claimHCIDdata.Hospital.Id)
+                    {
+                        returnMessage = $"Romatoloji için Dahiliye muayenesi şarttır! Romatoloji randevusu alabileceğiniz uygun hastane: {claimHCIDdata.Hospital.HospitalName}";
+                    }
+                }
+                else
+                {
+                    returnMessage = "DİKKAT! Romatolojiye randevu alabilmeniz için Dahiliyede son bir ay içinde muayene olmuş olmanız gereklidir!";
+                }
+                return returnMessage;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         [Authorize]
         public JsonResult CancelAppointment(int id)
         {
@@ -342,12 +393,12 @@ namespace MHRSLite_UI.Controllers
             try
             {
                 var appointment = _unitOfWork.AppointmentRepository.GetFirstOrDefault(x => x.Id == id);
-                if (appointment!=null)
+                if (appointment != null)
                 {
                     appointment.AppointmentStatus = AppointmentStatus.Cancelled;
                     var result = _unitOfWork.AppointmentRepository.Update(appointment);
-                    message = result ? 
-                        "Randevunuz iptal edildi!" : 
+                    message = result ?
+                        "Randevunuz iptal edildi!" :
                         "HATA: Beklenmedik sorun oluştu!";
                     return result ?
                         Json(new { isSuccess = true, message }) :
