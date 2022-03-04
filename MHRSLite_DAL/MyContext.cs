@@ -26,5 +26,7 @@ namespace MHRSLite_DAL
         public virtual DbSet<HospitalClinic> HospitalClinics { get; set; }
         public virtual DbSet<AppointmentHour> AppointmentHours { get; set; }
         public virtual DbSet<Appointment> Appointments { get; set; }
+        public virtual DbSet<Deneme> Denemeler { get; set; }
+
     }
 }

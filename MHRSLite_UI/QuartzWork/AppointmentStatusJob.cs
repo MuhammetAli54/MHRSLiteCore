@@ -46,9 +46,9 @@ namespace MHRSLite_UI.QuartzWork
                 _logger.LogInformation("AppointmentStatus updated");
                 return Task.CompletedTask;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return Task.CompletedTask;
             }
         }
     }
