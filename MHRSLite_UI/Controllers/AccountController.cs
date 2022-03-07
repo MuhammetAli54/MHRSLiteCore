@@ -310,5 +310,10 @@ namespace MHRSLite_UI.Controllers
                 return View(model);
             }
         }
+
+        //public IActionResult GoogleLogin(string returnUrl)
+        //{
+        //yarın devam
+        //}
     }
 }
