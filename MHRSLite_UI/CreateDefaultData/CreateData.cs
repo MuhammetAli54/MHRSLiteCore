@@ -25,9 +25,58 @@ namespace MHRSLite_UI.CreateDefaultData
         {
             //Eklenmesini istediğim verileri ekleyecek metotları çağıralım
             CheckRoles(roleManager);
-            CreateCities(environment, unitOfWork);
+            //CreateCities(environment, unitOfWork);
             CreateClinics(environment, unitOfWork);
 
+            //Bu yöntemle sadece CheckRoles ce Cities'in import edilmesi uygundur.
+            //İlçeler hastaneler gibbi çok datanın olduğu durumlarda SQL scripti ile datalarınızı eklemeniz avantajlıdır.
+            //SQL query oluşturmakta zorlanacağınız kadar çok veri varsa ozaman dataları excele yapıştırıp Console App tarzı bir uygulama ile aşağıdaki kodları kullanarak datalarınızı daha kolay ekleyebilirsiniz.
+
+            //Canlıya çıkıldığında bu metot olmayacak
+        #if DEBUG
+            CreateDistricts(environment, unitOfWork);
+        #endif
+
+        }
+
+        private static void CreateDistricts(IWebHostEnvironment environment, IUnitOfWork unitOfWork)
+        {
+            try
+            {
+                var districtList = unitOfWork.DistrictRepository.GetAll().ToList();
+                //Provide a path for excel file
+                //Excel dosyasının bulunduğu yolu aldık
+                string path = Path.Combine(environment.WebRootPath, "Excels");
+                string fileName = Path.GetFileName("Districts.xlsx");
+                string filePath = Path.Combine(path, fileName);
+                using (var excelBook = new XLWorkbook(filePath))
+                {
+                    var rows = excelBook.Worksheet(1).RowsUsed();
+                    foreach (var item in rows)
+                    {
+                        if (item.RowNumber() > 1 && item.RowNumber() <= rows.Count())
+                        {
+                            var cell = item.Cell(1).Value;
+                            var cityId = Convert.ToByte(item.Cell(2).Value); //1
+                            var city = unitOfWork.CityRepository.GetFirstOrDefault(x=> x.Id==cityId);
+                            District district = new District()
+                            {
+                                DistrictName=cell.ToString(),
+                                CityId = cityId,
+                                CreatedDate= DateTime.Now
+                            };
+                            if (districtList.Count(x => x.DistrictName.ToLower() == cell.ToString().ToLower() && x.CityId ==cityId) == 0)
+                            {
+                                unitOfWork.DistrictRepository.Add(district);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         private static void CreateClinics(IWebHostEnvironment environment, IUnitOfWork unitOfWork)
@@ -53,7 +102,7 @@ namespace MHRSLite_UI.CreateDefaultData
                                 CreatedDate = DateTime.Now,
                                 ClinicName = cell.ToString()
                             };
-                            if (clinicList.Count(x=> x.ClinicName.ToLower()==cell.ToString().ToLower())==0)
+                            if (clinicList.Count(x => x.ClinicName.ToLower() == cell.ToString().ToLower()) == 0)
                             {
                                 unitOfWork.ClinicRepository.Add(clinic);
                             }
@@ -94,7 +143,7 @@ namespace MHRSLite_UI.CreateDefaultData
                 string filePath = Path.Combine(path, fileName);
                 using (var excelBook = new XLWorkbook(filePath))
                 {
-                    var rows = excelBook.Worksheet(1).RowsUsed(); 
+                    var rows = excelBook.Worksheet(1).RowsUsed();
                     foreach (var item in rows)
                     {
                         if (item.RowNumber() > 1 && item.RowNumber() <= rows.Count())
@@ -104,8 +153,8 @@ namespace MHRSLite_UI.CreateDefaultData
                             City city = new City()
                             {
                                 CreatedDate = DateTime.Now,
-                                CityName=cell.ToString(),
-                                PlateCode=Convert.ToByte(plateCode)
+                                CityName = cell.ToString(),
+                                PlateCode = Convert.ToByte(plateCode)
                             };
                             unitOfWork.CityRepository.Add(city);
                             //buraya geri döneceğiz
