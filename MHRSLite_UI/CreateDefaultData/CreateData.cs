@@ -26,7 +26,7 @@ namespace MHRSLite_UI.CreateDefaultData
             //Eklenmesini istediğim verileri ekleyecek metotları çağıralım
             CheckRoles(roleManager);
             //CreateCities(environment, unitOfWork);
-            CreateClinics(environment, unitOfWork);
+            //CreateClinics(environment, unitOfWork);
 
             //Bu yöntemle sadece CheckRoles ce Cities'in import edilmesi uygundur.
             //İlçeler hastaneler gibbi çok datanın olduğu durumlarda SQL scripti ile datalarınızı eklemeniz avantajlıdır.
