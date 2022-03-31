@@ -62,10 +62,10 @@ namespace MHRSLite_UI
                 options.IdleTimeout = TimeSpan.FromSeconds(60);
             });
             //Google api'den alýnan clientId ve clientsecret projeye dahil edildi.
-            services.AddAuthentication().AddGoogle(options => {
-                options.ClientId = Configuration["Authentication:Google:ClientId"];
-                options.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
-            });
+            //services.AddAuthentication().AddGoogle(options => {
+            //    options.ClientId = Configuration["Authentication:Google:ClientId"];
+            //    options.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
+            //});
 
             //*********************************
             services.AddIdentity<AppUser, AppRole>(opts =>
